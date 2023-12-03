@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class HomeController extends Controller
 {
@@ -14,6 +15,21 @@ class HomeController extends Controller
         return view('home');
     }
 
+    public function changeAuthState()
+    {
+        if(auth()->check()){
+            $user = auth()->user();
+            Auth::logout();
+            return view('logout');
+        }
+        else{
+            return redirect('register');
+        }
+    }
+    public function register()
+    {
+        return view('register');
+    }
     /**
      * Show the form for creating a new resource.
      */
@@ -61,4 +77,5 @@ class HomeController extends Controller
     {
         //
     }
+
 }

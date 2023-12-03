@@ -8,7 +8,7 @@
     <form class="form-inline" action="<?=config("app.url"); ?>/shipmodules/save" method="post">
     @csrf
     <p>
-        <label for="moudle_name">Module name:</label>
+        <label for="module_name">Module name:</label>
         <input type="text" name="module_name" id="module_name" size="25" required />
     </p>
     <p>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\ShipModules;
+use App\Models\ModuleCrew;
 
 class ShipModulesController extends Controller
 {
@@ -13,6 +14,7 @@ class ShipModulesController extends Controller
     public function index()
     {
         $myShipModules = ShipModules::all();
+
         return view('shipmodules.list', ['ship_modules' => $myShipModules]);
     }
 
@@ -44,6 +46,10 @@ class ShipModulesController extends Controller
 
             return redirect('/shipmodules/list');
         }
+        else
+        {
+            return view('message', ['message' => 'Validation failed!', 'type_of_message' => 'Error']);
+        }
     }
 
     /**
@@ -51,7 +57,17 @@ class ShipModulesController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $myShipModule = ShipModules::find($id);
+
+        if($myShipModule == null)
+        {
+            $error_message = "Ship module with id=" . $id . " not found!";
+            return view('message', ['message' => $error_message, 'type_of_message' => 'Error']);
+        }
+        if($myShipModule->count() > 0)
+        {
+            return view('shipmodules.show', ['shipmodule' => $myShipModule]);
+        }
     }
 
     /**
@@ -64,7 +80,11 @@ class ShipModulesController extends Controller
         if($myShipModule == null)
         {
             $error_message = "Ship module with id=" . $id . " not found!";
-            return view('shipmodules.message', ['message' => $error_message, 'type_of_message' => 'Error']);
+            return view('message', ['message' => $error_message, 'type_of_message' => 'Error']);
+        }
+        if($myShipModule->count() > 0)
+        {
+            return view('shipmodules.edit', ['shipmodule' => $myShipModule]);
         }
         
     }
@@ -74,7 +94,26 @@ class ShipModulesController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = $request->validate([
+            'module_name' => 'required|min:3|max:25|unique:ship_modules',
+            'is_workable' => 'required',
+        ]);
+        if($validated)
+        {
+            $mod_ship = ShipModules::find($id);
+
+            if($mod_ship == null)
+            {
+                $error_message = "Ship module with id=" . $id . " not found!";
+                return view('message', ['message' => $error_message, 'type_of_message' => 'Error']);
+            }
+            $mod_ship->module_name = $request->module_name;
+            $mod_ship->is_workable = $request->is_workable;
+
+            $mod_ship->save();
+
+            return redirect('/shipmodules/list');
+        }
     }
 
     /**
@@ -82,6 +121,38 @@ class ShipModulesController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $mod_ship = ShipModules::find($id);
+        if($mod_ship == null)
+        {
+            $error_message = "Ship module with id=" . $id . " not found!";
+            return view('message', ['message' => $error_message, 'type_of_message' => 'Error']);
+        }
+        else
+        {
+            $mod_ship->delete();
+            return redirect('/shipmodules/list');
+        }
+    }
+
+    private function getCrewMembers(string $id)
+    {
+        $crew = ModuleCrew::all()->where('ship_module_id', $id);
+        return $crew;
+    }
+
+    public function showCrew(string $id)
+    {
+        $myShipModule = ShipModules::find($id);
+
+        if($myShipModule == null)
+        {
+            $error_message = "Ship module with id=" . $id . " not found!";
+            return view('message', ['message' => $error_message, 'type_of_message' => 'Error']);
+        }
+        if($myShipModule->count() > 0)
+        {
+            $crew = $this->getCrewMembers($id);
+            return view('shipmodules.crew', ['shipmodule' => $myShipModule, 'crew' => $crew]);
+        }
     }
 }
