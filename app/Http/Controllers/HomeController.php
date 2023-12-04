@@ -15,6 +15,10 @@ class HomeController extends Controller
         return view('home');
     }
 
+    public function message(string $message){
+        return view('message', ['message' => $message]);
+    }
+
     public function changeAuthState()
     {
         if(auth()->check()){
